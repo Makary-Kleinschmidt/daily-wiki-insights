@@ -7,7 +7,6 @@ An autonomous, AI-powered website that generates daily insights from Wikipedia's
 -   **Autonomous Content Generation**: Fetches Wikipedia's "Today's Featured Article" daily.
 -   **AI-Powered Insights**: Uses OpenRouter (Claude/GPT) to rewrite content into engaging, relevant insights.
 -   **Modern Editorial Design**: Generates a clean, responsive static site.
--   **Self-Healing**: Includes an agent script to monitor and fix generation issues.
 -   **Automated Deployment**:
     -   **Windows**: Runs via Task Scheduler and pushes to GitHub Pages.
     -   **GitHub Actions**: (Optional) Can run entirely in the cloud.
@@ -24,8 +23,8 @@ An autonomous, AI-powered website that generates daily insights from Wikipedia's
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/wikipedia-insights.git
-    cd wikipedia-insights
+    git clone https://github.com/Makary-Kleinschmidt/daily-wiki-insights.git
+    cd daily-wiki-insights
     ```
 
 2.  **Initialize the environment**:
@@ -57,7 +56,7 @@ To make your website live, you need to enable GitHub Pages **once**:
 5.  Under **Branch**, select **gh-pages** and **/ (root)**.
 6.  Click **Save**.
 
-🎉 Your site is now live at `https://<your-username>.github.io/wikipedia-insights/`!
+🎉 Your site is now live at `https://Makary-Kleinschmidt.github.io/daily-wiki-insights/`!
 
 ### Manual Run
 
