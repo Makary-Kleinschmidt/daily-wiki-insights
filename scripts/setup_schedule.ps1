@@ -1,11 +1,11 @@
 # scripts/setup_schedule.ps1
 $ErrorActionPreference = "Stop"
 
-$TaskName = "BrainRotWikiDailyUpdate"
+$TaskName = "WikipediaInsightsDailyUpdate"
 $ScriptPath = Join-Path $PSScriptRoot "run_daily.ps1"
 $Time = "09:00am" # Default time
 
-Write-Host "Setting up daily schedule for Brain Rot Wiki..."
+Write-Host "Setting up daily schedule for Wikipedia Insights..."
 Write-Host "Task Name: $TaskName"
 Write-Host "Script: $ScriptPath"
 Write-Host "Time: $Time"
@@ -30,10 +30,11 @@ $Trigger = New-ScheduledTaskTrigger -Daily -At $Time
 
 # Register Task
 try {
-    # Unregister if exists
+    # Unregister if exists (checking old name too)
+    Unregister-ScheduledTask -TaskName "BrainRotWikiDailyUpdate" -Confirm:$false -ErrorAction SilentlyContinue
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
     
-    Register-ScheduledTask -TaskName $TaskName -Trigger $Trigger -Action $Action -Description "Daily update for Brain Rot Wiki using uv"
+    Register-ScheduledTask -TaskName $TaskName -Trigger $Trigger -Action $Action -Description "Daily update for Wikipedia Insights using uv"
     Write-Host "✅ Task '$TaskName' successfully registered to run daily at $Time."
     Write-Host "You can verify this in Task Scheduler."
 }

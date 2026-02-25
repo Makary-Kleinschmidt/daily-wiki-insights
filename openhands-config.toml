@@ -1,5 +1,5 @@
 [agent]
-name = "BrainRotAgent"
+name = "WikipediaInsightsAgent"
 model = "openrouter/anthropic/claude-sonnet-4"
 api_key = "${OPENROUTER_API_KEY}"
 base_url = "https://openrouter.ai/api/v1"

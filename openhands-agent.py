@@ -19,7 +19,7 @@ def check_website_health():
             "has_content": len(content) > 1000,
             "has_title": "<title>" in content,
             "not_empty": "{{title}}" not in content,  # Template rendered
-            "has_brain_rot": "☕" in content or "no cap" in content
+            "has_insights": "Daily Wiki Insights" in content or "Why It Matters" in content
         }
         
         return all(checks.values())

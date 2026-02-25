@@ -9,9 +9,12 @@ except ImportError:
     from rewriter import rewrite_content
 from jinja2 import Template
 from dotenv import load_dotenv
+import markdown
 
 # Load environment variables
 load_dotenv()
+
+import re
 
 def generate_site():
     # 1. Scrape Wikipedia
@@ -23,8 +26,20 @@ def generate_site():
         return
 
     # 2. Rewrite via OpenRouter
-    print(f"🧠 Applying brain rot transformation to '{article['title']}'...")
-    brain_rot_content = rewrite_content(article["extract"], article["title"])
+    print(f"🧠 Applying insight transformation to '{article['title']}'...")
+    insight_content = rewrite_content(article["extract"], article["title"])
+    
+    # Post-process Markdown to ensure clean rendering
+    # Strip whitespace
+    insight_content = insight_content.strip()
+    # Ensure headers have preceding newlines
+    insight_content = re.sub(r'\s*(#{1,6})\s*', r'\n\n\1 ', insight_content)
+    # Ensure bold tags have spaces around them if stuck to text (optional, but good for readability)
+    # insight_content = re.sub(r'(?<!\s)(\*\*)', r' \1', insight_content) 
+
+    # Convert Markdown to HTML
+    print("📝 Converting Markdown to HTML...")
+    html_content = markdown.markdown(insight_content, extensions=['extra'])
     
     # 3. Generate HTML
     print("🎨 Generating site...")
@@ -37,7 +52,9 @@ def generate_site():
         # Fallback if template is not in site/ but in src/ or relative
         # Assuming run from root, site/template.html should be there
         print(f"⚠️ Template not found at {template_path}, checking fallback...")
-        if os.path.exists("brain-rot-wiki/site/template.html"):
+        if os.path.exists("wikipedia-insights/site/template.html"):
+             template_path = "wikipedia-insights/site/template.html"
+        elif os.path.exists("brain-rot-wiki/site/template.html"): # Keep for backward compatibility/during transition
              template_path = "brain-rot-wiki/site/template.html"
         else:
              print("❌ Template file not found!")
@@ -49,7 +66,7 @@ def generate_site():
     
     html = template.render(
         title=article["title"],
-        content=brain_rot_content,
+        content=html_content,
         image=article.get("thumbnail"),
         wiki_url=article["url"],
         date=date.today().strftime("%B %d, %Y")

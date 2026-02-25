@@ -9,7 +9,7 @@ def get_todays_featured_article():
     endpoint = f"https://api.wikimedia.org/feed/v1/wikipedia/en/featured/{today.replace('-', '/')}"
     
     headers = {
-        "User-Agent": "BrainRotWiki/1.0 (https://github.com/example/brain-rot-wiki; contact@example.com)"
+        "User-Agent": "WikipediaInsights/1.0 (https://github.com/example/wikipedia-insights; contact@example.com)"
     }
     
     response = requests.get(endpoint, headers=headers)

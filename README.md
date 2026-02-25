@@ -24,8 +24,8 @@ An autonomous, AI-powered website that generates daily insights from Wikipedia's
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/daily-wiki-insights.git
-    cd daily-wiki-insights
+    git clone https://github.com/yourusername/wikipedia-insights.git
+    cd wikipedia-insights
     ```
 
 2.  **Initialize the environment**:
@@ -46,6 +46,19 @@ An autonomous, AI-powered website that generates daily insights from Wikipedia's
 
 ## 🏃‍♂️ Usage
 
+### ⚡ One-Time GitHub Setup (Required for Website)
+
+To make your website live, you need to enable GitHub Pages **once**:
+
+1.  Push your code to GitHub: `git push origin main`
+2.  Wait for the "Daily Wikipedia Insights Update" action to finish (it might fail the first time if Pages isn't set up, that's okay).
+3.  Go to your repository **Settings** > **Pages**.
+4.  Under **Build and deployment** > **Source**, select **Deploy from a branch**.
+5.  Under **Branch**, select **gh-pages** and **/ (root)**.
+6.  Click **Save**.
+
+🎉 Your site is now live at `https://<your-username>.github.io/wikipedia-insights/`!
+
 ### Manual Run
 
 Generate the site immediately:
@@ -56,14 +69,14 @@ Check `site/index.html` to see the result.
 
 ### 📅 Automate on Windows
 
-This sets up a daily task (9:00 AM) that generates content and pushes it to GitHub.
+This sets up a daily task (9:00 AM) that generates content locally and pushes it to GitHub, which then updates the live site.
 
 1.  **Open PowerShell as Administrator**.
 2.  **Run the setup script**:
     ```powershell
     ./scripts/setup_schedule.ps1
     ```
-3.  **Verify**: Open "Task Scheduler" and look for `BrainRotWikiDailyUpdate`.
+3.  **Verify**: Open "Task Scheduler" and look for `WikipediaInsightsDailyUpdate`.
 
 ### ☁️ Automate on GitHub Actions
 
