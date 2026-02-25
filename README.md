@@ -1,6 +1,7 @@
 # Daily Wiki Insights 🧠
 
 An autonomous, AI-powered website that generates daily insights from Wikipedia's Featured Article. It connects historical facts to modern life, running entirely on your local machine or GitHub Actions.
+
 https://makary-kleinschmidt.github.io/daily-wiki-insights/
 
 ## 🚀 Features
