@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Wiki Insights 🧠 | {{title}}</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Daily Wiki Insights</h1>
+            <p class="tagline">Uncovering the hidden stories behind today's featured article.</p>
+            <div class="date">{{date}}</div>
+        </header>
+        
+        <main>
+            <article class="wiki-card">
+                <h2>{{title}}</h2>
+                {% if image %}
+                <img src="{{image}}" alt="{{title}}" class="hero-img">
+                {% endif %}
+                <div class="content">
+                    {{content}}
+                </div>
+                <div class="source">
+                    <a href="{{wiki_url}}" target="_blank">Read the full article on Wikipedia →</a>
+                </div>
+            </article>
+        </main>
+        
+        <footer>
+            <p>Curated by AI • Powered by OpenRouter + Wikipedia</p>
+        </footer>
+    </div>
+</body>
+</html>

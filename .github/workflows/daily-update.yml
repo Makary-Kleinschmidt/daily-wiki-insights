@@ -1,0 +1,36 @@
+# .github/workflows/daily-update.yml
+name: Daily Brain Rot Update
+
+on:
+  schedule:
+    # Run at 00:00 UTC daily (after Wikipedia updates TFA)
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+          
+      - name: Set up Python
+        run: uv python install 3.12
+            
+      - name: Install dependencies
+        run: uv sync --frozen
+          
+      - name: Generate new content
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          uv run src/main.py
+          
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site

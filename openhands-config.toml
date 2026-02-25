@@ -1,0 +1,13 @@
+[agent]
+name = "BrainRotAgent"
+model = "openrouter/anthropic/claude-sonnet-4"
+api_key = "${OPENROUTER_API_KEY}"
+base_url = "https://openrouter.ai/api/v1"
+
+[workspace]
+mount_path = "./"
+output_path = "./site"
+
+[tools]
+allowed_commands = ["python", "git", "uv"]
+file_operations = ["read", "write", "edit"]
