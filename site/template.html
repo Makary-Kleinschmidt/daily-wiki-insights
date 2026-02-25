@@ -16,16 +16,24 @@
         </header>
         
         <main>
-            <article class="wiki-card">
-                <h2>{{title}}</h2>
+            <article class="wiki-card {% if not image %}no-image{% endif %}">
                 {% if image %}
-                <img src="{{image}}" alt="{{title}}" class="hero-img">
+                <div class="card-background" style="background-image: url('{{image}}');"></div>
                 {% endif %}
-                <div class="content">
-                    {{content}}
+                
+                <div class="card-header">
+                    <h2>{{title}}</h2>
                 </div>
-                <div class="source">
-                    <a href="{{wiki_url}}" target="_blank">Read the full article on Wikipedia →</a>
+                
+                <div class="card-body">
+                    <div class="card-content">
+                        <div class="content">
+                            {{content | safe}}
+                        </div>
+                        <div class="source">
+                            <a href="{{wiki_url}}" target="_blank">Read the full article on Wikipedia →</a>
+                        </div>
+                    </div>
                 </div>
             </article>
         </main>
