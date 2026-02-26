@@ -11,7 +11,7 @@ graph LR
     A[Scheduler] -->|Trigger| B(src/main.py)
     B -->|Fetch| C[Wikipedia API]
     C -->|Raw Data| B
-    B -->|Transform| D[OpenRouter LLM]
+    B -->|Transform| D[Gemini API]
     D -->|Insight Markdown| B
     B -->|Convert| E[Markdown to HTML]
     E -->|Render| F[Static HTML Site]
@@ -49,9 +49,10 @@ wikipedia-insights/
 -   **Data Flow**: `GET https://api.wikimedia.org/...` -> JSON Response -> Dictionary.
 
 ### 3. **Content Transformer: `src/rewriter.py`**
--   **Library**: `requests` (calling OpenRouter API)
--   **Why**: Universal interface for LLMs (Claude, GPT, etc.).
--   **Role**: Sends raw Wikipedia text + Prompt -> LLM -> Returns "Insightful" article in **Markdown**.
+-   **Library**: `google-genai` (calling Gemini API)
+-   **Why**: Native Google SDK for Gemini 3.0 Flash.
+-   **Role**: Sends raw Wikipedia text + Prompt -> Gemini -> Returns "Insightful" article text.
+-   **Rate Limiting**: Implements 5 RPM throttle (12s delay) for free tier stability.
 -   **Customization**: Change `INSIGHT_PROMPT` in `src/config.py` to alter the writing style.
 
 ### 4. **Site Generator: `src/main.py`**
@@ -73,9 +74,9 @@ wikipedia-insights/
 2.  **Input**: `src/scraper.py` hits Wikipedia.
     *   *Input*: Date (Today)
     *   *Output*: `{ title, extract, thumbnail_url, wiki_url }`
-3.  **Processing**: `src/rewriter.py` calls OpenRouter.
+3.  **Processing**: `src/rewriter.py` calls Gemini API.
     *   *Input*: Raw extract + Prompt
-    *   *Output*: Rewritten Markdown text (300-500 words).
+    *   *Output*: Rewritten insight text (300-500 words).
 4.  **Conversion**: `src/main.py` uses `markdown` library.
     *   *Input*: Markdown string (`**bold**`, `## Heading`)
     *   *Output*: HTML string (`<strong>bold</strong>`, `<h2>Heading</h2>`)
@@ -111,6 +112,6 @@ wikipedia-insights/
 ---
 
 ## ⚠️ Key Constraints
-*   **API Limits**: Wikipedia has rate limits (handled by User-Agent). OpenRouter costs money per token.
+*   **API Limits**: Wikipedia has rate limits (handled by User-Agent). Gemini 3.0 Flash free tier is limited to 5 calls per minute and 20 requests per day (throttled by `RATE_LIMIT_DELAY`).
 *   **Markdown Parsing**: The LLM must return valid Markdown. If it returns malformed text, the HTML conversion might look odd.
 *   **Image Handling**: We hotlink images from Wikimedia. If they delete the image, it breaks (handled by `{% if image %}` check).

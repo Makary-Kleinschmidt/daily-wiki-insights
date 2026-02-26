@@ -7,7 +7,7 @@ https://makary-kleinschmidt.github.io/daily-wiki-insights/
 ## 🚀 Features
 
 -   **Autonomous Content Generation**: Fetches Wikipedia's "Today's Featured Article" daily.
--   **AI-Powered Insights**: Uses OpenRouter (Claude/GPT) to rewrite content into engaging, relevant insights.
+-   **AI Insights**: Uses Gemini 3.0 Flash to rewrite content into engaging, relevant insights.
 -   **Modern Editorial Design**: Generates a clean, responsive static site.
 -   **Automated Deployment**:
     -   **Windows**: Runs via Task Scheduler and pushes to GitHub Pages.
@@ -39,9 +39,9 @@ https://makary-kleinschmidt.github.io/daily-wiki-insights/
         ```bash
         cp .env.example .env
         ```
-    -   Edit `.env` and add your **OpenRouter API Key**:
+    -   Edit `.env` and add your **Gemini API Key**:
         ```
-        OPENROUTER_API_KEY=sk-or-v1-your-key-here
+        GEMINI_API_KEY=your_key_here
         ```
     -   *Note: `.env` is git-ignored to keep your secrets safe.*
 
@@ -83,8 +83,8 @@ This sets up a daily task (9:00 AM) that generates content locally and pushes it
 
 1.  Go to your repository **Settings > Secrets and variables > Actions**.
 2.  Add a new Repository Secret:
-    -   Name: `OPENROUTER_API_KEY`
-    -   Value: Your OpenRouter API key.
+    -   Name: `GEMINI_API_KEY`
+    -   Value: Your Gemini API key.
 3.  The workflow is already configured in `.github/workflows/daily-update.yml`.
 
 ## 🛡️ Security
@@ -97,4 +97,4 @@ This sets up a daily task (9:00 AM) that generates content locally and pushes it
 Feel free to open issues or submit PRs to improve the prompts or styling!
 
 ---
-*Powered by [OpenRouter](https://openrouter.ai) and [Wikipedia](https://wikipedia.org).*
+*Powered by [Gemini API](https://ai.google.dev/) and [Wikipedia](https://wikipedia.org).*
