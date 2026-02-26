@@ -1,8 +1,15 @@
 import os
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-REWRITE_MODEL = "deepseek/deepseek-v3.2"
+# --- OpenRouter (commented out, kept for rollback) ---
+# OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+# OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+# REWRITE_MODEL = "deepseek/deepseek-v3.2"
+
+# --- Gemini API ---
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = "gemini-3.0-flash"
+RATE_LIMIT_DELAY = 12  # seconds between calls (5 RPM limit)
+DAILY_LIMIT = 20       # max 20 requests per day
 
 # Insightful & Relevant Style Prompt
 INSIGHT_PROMPT = """You are an expert content creator and intellectual newsletter author. You excel at transforming factual information into captivating narratives.
