@@ -41,35 +41,76 @@ except ImportError:
 
 # --- Gemini API version ---
 
-def rewrite_content(content: str, title: str) -> str:
-    """Send content to Gemini API for insightful transformation."""
-
+def _get_gemini_client():
+    """Creates and returns a Gemini client with timeout."""
     api_key = os.getenv('GEMINI_API_KEY') or config.GEMINI_API_KEY
     if not api_key:
         print("Warning: GEMINI_API_KEY not found.")
-        return content  # Return original if no key
+        return None
+    # Configure timeout via http_options (in milliseconds)
+    timeout_ms = getattr(config, 'GEMINI_TIMEOUT', 60) * 1000
+    return genai.Client(
+        api_key=api_key,
+        http_options={'timeout': timeout_ms}
+    )
 
-    client = genai.Client(api_key=api_key)
 
+def _call_gemini_with_fallback(prompt, system_instruction, temperature=0.7, max_tokens=2000):
+    """
+    Calls Gemini API with model fallback and retries on 503 errors.
+    Returns the response text or None.
+    """
+    client = _get_gemini_client()
+    if not client:
+        return None
+
+    models = getattr(config, 'GEMINI_FALLBACK_MODELS', [config.GEMINI_MODEL])
+    
+    for model_name in models:
+        for attempt in range(config.MAX_RETRIES + 1):
+            try:
+                print(f"  🤖 Writing with {model_name} (Attempt {attempt + 1})...", flush=True)
+                start_time = time.time()
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=genai.types.GenerateContentConfig(
+                        system_instruction=system_instruction,
+                        temperature=temperature,
+                        max_output_tokens=max_tokens,
+                    ),
+                )
+                duration = time.time() - start_time
+                print(f"  ✅ Response received in {duration:.1f}s.", flush=True)
+                
+                # Rate limit pause after success
+                print(f"  ⏳ Rate limit pause ({config.RATE_LIMIT_DELAY}s)...")
+                time.sleep(config.RATE_LIMIT_DELAY)
+                
+                return response.text
+            
+            except Exception as e:
+                err_msg = str(e).lower()
+                if "503" in err_msg or "service unavailable" in err_msg or "429" in err_msg:
+                    if attempt < config.MAX_RETRIES:
+                        print(f"  ⚠️ Service unstable ({e}). Retrying in {config.RETRY_DELAY}s...")
+                        time.sleep(config.RETRY_DELAY)
+                        continue
+                print(f"  ❌ Error with {model_name}: {e}")
+                break # Try next model
+    
+    return None
+
+
+def rewrite_content(content: str, title: str) -> str:
+    """Send content to Gemini API for insightful transformation with fallback and retries."""
     prompt = config.INSIGHT_PROMPT.format(content=content)
 
-    try:
-        response = client.models.generate_content(
-            model=config.GEMINI_MODEL,
-            contents=prompt,
-            config=genai.types.GenerateContentConfig(
-                system_instruction="You are a knowledgeable curator who transforms standard encyclopedia articles into engaging, relevant insights for modern readers. You focus on obscure facts and practical applications.",
-                temperature=0.7,
-                max_output_tokens=1000,
-            ),
-        )
+    result = _call_gemini_with_fallback(
+        prompt=prompt,
+        system_instruction="You are a knowledgeable curator who transforms standard encyclopedia articles into engaging, relevant insights for modern readers. You focus on obscure facts and practical applications.",
+        temperature=0.7,
+        max_tokens=2000
+    )
 
-        # Rate limiting: 5 RPM
-        print(f"  ⏳ Rate limit pause ({config.RATE_LIMIT_DELAY}s)...")
-        time.sleep(config.RATE_LIMIT_DELAY)
-
-        return response.text
-
-    except Exception as e:
-        print(f"Error calling Gemini API: {e}")
-        return content  # Fallback to original
+    return result if result else content  # Fallback to original if API fails

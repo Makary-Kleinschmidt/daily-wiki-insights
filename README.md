@@ -8,7 +8,10 @@ https://makary-kleinschmidt.github.io/daily-wiki-insights/
 
 -   **Autonomous Content Generation**: Fetches Wikipedia's "Today's Featured Article" daily.
 -   **AI Insights**: Uses Gemini 3.0 Flash to rewrite content into engaging, relevant insights.
+-   **Resilient Calling**: Implements automated 503 retries and model fallbacks (Gemini 3 → 2.5 → 2.0).
 -   **Modern Editorial Design**: Generates a clean, responsive static site.
+
+See [CHANGELOG.md](./CHANGELOG.md) for recent updates.
 -   **Automated Deployment**:
     -   **Windows**: Runs via Task Scheduler and pushes to GitHub Pages.
     -   **GitHub Actions**: (Optional) Can run entirely in the cloud.
