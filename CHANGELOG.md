@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.4] - 2026-02-27
+
+### Changed
+- **Rate Limit Intelligence**: Implemented session-level model exhaustion tracking to handle daily quota limits gracefully.
+
 ## [1.1.3] - 2026-02-27
 
 ### Changed

@@ -55,6 +55,10 @@ def _get_gemini_client():
     )
 
 
+
+# Track exhausted models globally for the session
+_exhausted_models = set()
+
 def _call_gemini_with_fallback(prompt, system_instruction, temperature=0.7, max_tokens=2000):
     """
     Calls Gemini API with model fallback and retries on 503 errors.
@@ -66,7 +70,17 @@ def _call_gemini_with_fallback(prompt, system_instruction, temperature=0.7, max_
 
     models = getattr(config, 'GEMINI_FALLBACK_MODELS', [config.GEMINI_MODEL])
     
+    # Filter out models known to be exhausted in this session
+    models = [m for m in models if m not in _exhausted_models]
+    
+    if not models:
+        print("❌ All configured models are exhausted or unavailable.")
+        return None
+    
     for model_name in models:
+        if model_name in _exhausted_models:
+            continue
+            
         for attempt in range(config.MAX_RETRIES + 1):
             try:
                 print(f"  🤖 Writing with {model_name} (Attempt {attempt + 1})...", flush=True)
@@ -91,11 +105,27 @@ def _call_gemini_with_fallback(prompt, system_instruction, temperature=0.7, max_
             
             except Exception as e:
                 err_msg = str(e).lower()
-                if "503" in err_msg or "service unavailable" in err_msg or "429" in err_msg:
+                is_retryable = any(code in err_msg for code in [
+                    "503", "service unavailable",
+                    "429", "resource_exhausted",
+                    "504", "deadline_exceeded"
+                ])
+                
+                if is_retryable:
                     if attempt < config.MAX_RETRIES:
-                        print(f"  ⚠️ Service unstable ({e}). Retrying in {config.RETRY_DELAY}s...")
-                        time.sleep(config.RETRY_DELAY)
+                        wait_time = config.RETRY_DELAY
+                        if "429" in err_msg or "resource_exhausted" in err_msg:
+                            print(f"  ⚠️ Rate Limit/Quota (429) on {model_name}. Retrying in {wait_time}s...")
+                        else:
+                            print(f"  ⚠️ Service unstable ({e}). Retrying in {config.RETRY_DELAY}s...")
+                        time.sleep(wait_time)
                         continue
+                    else:
+                        # Mark as exhausted if repeated 429s
+                        if "429" in err_msg or "resource_exhausted" in err_msg:
+                            print(f"  🚫 {model_name} seems to have hit DAILY LIMIT (or persistent 429). Marking as exhausted.")
+                            _exhausted_models.add(model_name)
+                
                 print(f"  ❌ Error with {model_name}: {e}")
                 break # Try next model
     
