@@ -567,6 +567,7 @@ dependencies = [
     { name = "markdown" },
     { name = "python-dotenv" },
     { name = "requests" },
+    { name = "tenacity" },
 ]
 
 [package.metadata]
@@ -576,4 +577,5 @@ requires-dist = [
     { name = "markdown", specifier = ">=3.10.2" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "requests", specifier = ">=2.32.5" },
+    { name = "tenacity", specifier = ">=9.1.4" },
 ]

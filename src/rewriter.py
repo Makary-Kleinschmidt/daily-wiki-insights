@@ -1,43 +1,7 @@
 import os
 import time
 from google import genai
-try:
-    from . import config
-except ImportError:
-    import config
-
-# --- OpenRouter version (commented out, kept for rollback) ---
-# import requests
-#
-# def rewrite_content_openrouter(content: str, title: str) -> str:
-#     """Send content to OpenRouter for insightful transformation"""
-#     api_key = os.getenv('OPENROUTER_API_KEY') or config.OPENROUTER_API_KEY
-#     if not api_key:
-#         print("Warning: OPENROUTER_API_KEY not found.")
-#         return content
-#     headers = {
-#         "Authorization": f"Bearer {api_key}",
-#         "Content-Type": "application/json",
-#         "HTTP-Referer": "https://daily-wiki-insights.github.io",
-#         "X-Title": "Daily Wiki Insights"
-#     }
-#     prompt = config.INSIGHT_PROMPT.format(content=content)
-#     payload = {
-#         "model": config.REWRITE_MODEL,
-#         "messages": [
-#             {"role": "system", "content": "You are a knowledgeable curator who transforms standard encyclopedia articles into engaging, relevant insights for modern readers. You focus on obscure facts and practical applications."},
-#             {"role": "user", "content": prompt}
-#         ],
-#         "temperature": 0.7,
-#         "max_tokens": 1000
-#     }
-#     try:
-#         response = requests.post(config.OPENROUTER_BASE_URL + "/chat/completions", headers=headers, json=payload)
-#         response.raise_for_status()
-#         return response.json()["choices"][0]["message"]["content"]
-#     except Exception as e:
-#         print(f"Error calling OpenRouter: {e}")
-#         return content
+from src import config
 
 # --- Gemini API version ---
 
@@ -59,9 +23,45 @@ def _get_gemini_client():
 # Track exhausted models globally for the session
 _exhausted_models = set()
 
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+def retry_if_api_error(exception):
+    err_msg = str(exception).lower()
+    return any(code in err_msg for code in [
+        "503", "service unavailable",
+        "429", "resource_exhausted",
+        "504", "deadline_exceeded"
+    ])
+
+@retry(
+    stop=stop_after_attempt(config.MAX_RETRIES + 1),
+    wait=wait_exponential(multiplier=1, min=config.RETRY_DELAY, max=60),
+    retry=retry_if_exception_type(Exception) & retry_if_api_error
+)
+def _call_gemini_single_model(client, model_name, prompt, system_instruction, temperature, max_tokens):
+    print(f"  🤖 Writing with {model_name}...", flush=True)
+    start_time = time.time()
+    response = client.models.generate_content(
+        model=model_name,
+        contents=prompt,
+        config=genai.types.GenerateContentConfig(
+            system_instruction=system_instruction,
+            temperature=temperature,
+            max_output_tokens=max_tokens,
+        ),
+    )
+    duration = time.time() - start_time
+    print(f"  ✅ Response received in {duration:.1f}s.", flush=True)
+    
+    # Rate limit pause after success
+    print(f"  ⏳ Rate limit pause ({config.RATE_LIMIT_DELAY}s)...")
+    time.sleep(config.RATE_LIMIT_DELAY)
+    
+    return response.text
+
 def _call_gemini_with_fallback(prompt, system_instruction, temperature=0.7, max_tokens=2000):
     """
-    Calls Gemini API with model fallback and retries on 503 errors.
+    Calls Gemini API with model fallback and retries on transient errors.
     Returns the response text or None.
     """
     client = _get_gemini_client()
@@ -81,53 +81,14 @@ def _call_gemini_with_fallback(prompt, system_instruction, temperature=0.7, max_
         if model_name in _exhausted_models:
             continue
             
-        for attempt in range(config.MAX_RETRIES + 1):
-            try:
-                print(f"  🤖 Writing with {model_name} (Attempt {attempt + 1})...", flush=True)
-                start_time = time.time()
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=prompt,
-                    config=genai.types.GenerateContentConfig(
-                        system_instruction=system_instruction,
-                        temperature=temperature,
-                        max_output_tokens=max_tokens,
-                    ),
-                )
-                duration = time.time() - start_time
-                print(f"  ✅ Response received in {duration:.1f}s.", flush=True)
-                
-                # Rate limit pause after success
-                print(f"  ⏳ Rate limit pause ({config.RATE_LIMIT_DELAY}s)...")
-                time.sleep(config.RATE_LIMIT_DELAY)
-                
-                return response.text
-            
-            except Exception as e:
-                err_msg = str(e).lower()
-                is_retryable = any(code in err_msg for code in [
-                    "503", "service unavailable",
-                    "429", "resource_exhausted",
-                    "504", "deadline_exceeded"
-                ])
-                
-                if is_retryable:
-                    if attempt < config.MAX_RETRIES:
-                        wait_time = config.RETRY_DELAY
-                        if "429" in err_msg or "resource_exhausted" in err_msg:
-                            print(f"  ⚠️ Rate Limit/Quota (429) on {model_name}. Retrying in {wait_time}s...")
-                        else:
-                            print(f"  ⚠️ Service unstable ({e}). Retrying in {config.RETRY_DELAY}s...")
-                        time.sleep(wait_time)
-                        continue
-                    else:
-                        # Mark as exhausted if repeated 429s
-                        if "429" in err_msg or "resource_exhausted" in err_msg:
-                            print(f"  🚫 {model_name} seems to have hit DAILY LIMIT (or persistent 429). Marking as exhausted.")
-                            _exhausted_models.add(model_name)
-                
-                print(f"  ❌ Error with {model_name}: {e}")
-                break # Try next model
+        try:
+            return _call_gemini_single_model(client, model_name, prompt, system_instruction, temperature, max_tokens)
+        except Exception as e:
+            err_msg = str(e).lower()
+            if "429" in err_msg or "resource_exhausted" in err_msg:
+                print(f"  🚫 {model_name} seems to have hit DAILY LIMIT (or persistent 429). Marking as exhausted.")
+                _exhausted_models.add(model_name)
+            print(f"  ❌ Max retries reached or unrecoverable error with {model_name}: {e}. Trying next model...")
     
     return None
 

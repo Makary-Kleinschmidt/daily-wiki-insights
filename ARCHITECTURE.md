@@ -43,16 +43,16 @@ wikipedia-insights/
 -   **Key Command**: `uv run src/main.py` (executes script in isolated env).
 
 ### 2. **Content Fetcher: `src/scraper.py`**
--   **Library**: `requests`
--   **Why**: Simple, robust HTTP library for API calls.
+-   **Libraries**: `requests`, `tenacity`
+-   **Why**: Simple, robust HTTP library for API calls, combined with `tenacity` for resilient retries.
 -   **Role**: Fetches "Today's Featured Article" from the Wikimedia REST API.
 -   **Data Flow**: `GET https://api.wikimedia.org/...` -> JSON Response -> Dictionary.
 
 ### 3. **Content Transformer: `src/rewriter.py`**
--   **Library**: `google-genai` (calling Gemini API)
--   **Why**: Native Google SDK for Gemini 3.0 Flash.
+-   **Libraries**: `google-genai` (calling Gemini API), `tenacity`
+-   **Why**: Native Google SDK for Gemini 3.0 Flash. `tenacity` handles resilient API fallback routing.
 -   **Role**: Sends raw Wikipedia text + Prompt -> Gemini -> Returns "Insightful" article text.
--   **Rate Limiting**: Implements 5 RPM throttle (12s delay) for free tier stability.
+-   **Rate Limiting**: Implements 5 RPM throttle (12s delay) and automated retries for transient errors.
 -   **Customization**: Change `INSIGHT_PROMPT` in `src/config.py` to alter the writing style.
 
 ### 4. **Site Generator: `src/main.py`**

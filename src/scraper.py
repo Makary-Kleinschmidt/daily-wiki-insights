@@ -1,6 +1,11 @@
 import requests
 from datetime import date
+from tenacity import retry, stop_after_attempt, wait_exponential
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10)
+)
 def get_todays_featured_article():
     """Fetch Today's Featured Article from Wikipedia API"""
     today = date.today().isoformat()
@@ -13,6 +18,7 @@ def get_todays_featured_article():
     }
     
     response = requests.get(endpoint, headers=headers)
+    response.raise_for_status()
     if response.status_code != 200:
         print(f"Error fetching Wikipedia TFA: {response.status_code}")
         return {
