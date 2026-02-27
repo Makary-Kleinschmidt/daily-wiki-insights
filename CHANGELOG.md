@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2026-02-27
+
+### Fixed
+- **Short Content Issue**: Switched primary model to `gemini-2.0-flash` to resolve issues with short/truncated content generation due to model quota exhaustion.
+
 ## [1.1.0] - 2026-02-26
 
 ### Added
