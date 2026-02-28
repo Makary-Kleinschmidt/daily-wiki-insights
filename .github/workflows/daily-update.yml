@@ -42,7 +42,7 @@ jobs:
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          uv run src/main.py
+          uv run python -m src.main
           
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

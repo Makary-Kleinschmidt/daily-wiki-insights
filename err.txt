@@ -1,0 +1,35 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\Elf\Desktop\AutoWebsite\brain-rot-wiki
+configfile: pyproject.toml
+plugins: anyio-4.12.1, mock-3.15.1
+collected 2 items / 2 errors
+
+=================================== ERRORS ====================================
+_____________________ ERROR collecting tests/test_main.py _____________________
+tests\test_main.py:8: in <module>
+    from src.main import generate_site
+src\main.py:5: in <module>
+    from src.rewriter import rewrite_content
+src\rewriter.py:48: in <module>
+    retry=retry_if_exception_type(Exception) & retry_if_api_error,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\tenacity\retry.py:33: in __and__
+    return other.__rand__(self)
+           ^^^^^^^^^^^^^^
+E   AttributeError: 'function' object has no attribute '__rand__'. Did you mean: '__call__'?
+___________________ ERROR collecting tests/test_rewriter.py ___________________
+tests\test_rewriter.py:8: in <module>
+    from src.rewriter import rewrite_content
+src\rewriter.py:48: in <module>
+    retry=retry_if_exception_type(Exception) & retry_if_api_error,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\tenacity\retry.py:33: in __and__
+    return other.__rand__(self)
+           ^^^^^^^^^^^^^^
+E   AttributeError: 'function' object has no attribute '__rand__'. Did you mean: '__call__'?
+=========================== short test summary info ===========================
+ERROR tests/test_main.py - AttributeError: 'function' object has no attribute...
+ERROR tests/test_rewriter.py - AttributeError: 'function' object has no attri...
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+============================== 2 errors in 0.90s ==============================

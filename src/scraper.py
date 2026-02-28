@@ -2,21 +2,19 @@ import requests
 from datetime import date
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=2, max=10)
-)
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def get_todays_featured_article():
     """Fetch Today's Featured Article from Wikipedia API"""
     today = date.today().isoformat()
-    
+
     # Wikimedia API endpoint for featured content
     endpoint = f"https://api.wikimedia.org/feed/v1/wikipedia/en/featured/{today.replace('-', '/')}"
-    
+
     headers = {
         "User-Agent": "WikipediaInsights/1.0 (https://github.com/example/wikipedia-insights; contact@example.com)"
     }
-    
+
     response = requests.get(endpoint, headers=headers)
     response.raise_for_status()
     if response.status_code != 200:
@@ -25,15 +23,15 @@ def get_todays_featured_article():
             "title": "Error fetching article",
             "extract": "Could not fetch today's featured article.",
             "thumbnail": "",
-            "url": ""
+            "url": "",
         }
-        
+
     data = response.json()
-    
+
     tfa = data.get("tfa", {})
     return {
         "title": tfa.get("titles", {}).get("normalized", "Unknown"),
         "extract": tfa.get("extract", ""),
         "thumbnail": tfa.get("thumbnail", {}).get("source", ""),
-        "url": tfa.get("content_urls", {}).get("desktop", {}).get("page", "")
+        "url": tfa.get("content_urls", {}).get("desktop", {}).get("page", ""),
     }

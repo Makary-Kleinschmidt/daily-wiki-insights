@@ -12,13 +12,13 @@ GEMINI_FALLBACK_MODELS = [
     "gemini-3-flash-preview",
     "gemini-2.5-flash",
     "gemini-2.0-flash",
-    "gemini-1.5-flash"
+    "gemini-1.5-flash",
 ]
 RATE_LIMIT_DELAY = 12  # seconds between calls (5 RPM limit)
-DAILY_LIMIT = 20       # max 20 requests per day
-MAX_RETRIES = 3        # retries for 503 errors
-RETRY_DELAY = 30       # seconds to wait before retry on 503
-GEMINI_TIMEOUT = 60    # seconds before timing out an API call
+DAILY_LIMIT = 20  # max 20 requests per day
+MAX_RETRIES = 3  # retries for 503 errors
+RETRY_DELAY = 30  # seconds to wait before retry on 503
+GEMINI_TIMEOUT = 60  # seconds before timing out an API call
 
 # Insightful & Relevant Style Prompt
 INSIGHT_PROMPT = """You are an expert content creator and intellectual newsletter author. You excel at transforming factual information into captivating narratives.
